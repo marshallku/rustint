@@ -8,3 +8,4 @@ license = "MIT"
 repository = "https://github.com/marshallku/rustint"
 
 [dependencies]
+thiserror = "1.0.64"
