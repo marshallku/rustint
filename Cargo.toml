@@ -1,9 +1,9 @@
 [package]
 name = "rustint"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Marshall Ku <marshall@kakao.com>"]
 edition = "2021"
-description = "Library for compressing and decompressing DNA sequences"
+description = "Library for working with RGB colors"
 license = "MIT"
 repository = "https://github.com/marshallku/rustint"
 
