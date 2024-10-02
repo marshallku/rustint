@@ -19,6 +19,17 @@ impl Color {
     pub fn new(red: u8, green: u8, blue: u8) -> Self {
         Color { red, green, blue }
     }
+
+    /// Interpolates between two RGB colors based on percentage.
+    pub fn interpolate(&self, color: &Color, percentage: f32) -> Self {
+        let ratio = percentage / 100.0;
+        let r = (self.red as f32 + (color.red as f32 - self.red as f32) * ratio).round() as u8;
+        let g =
+            (self.green as f32 + (color.green as f32 - self.green as f32) * ratio).round() as u8;
+        let b = (self.blue as f32 + (color.blue as f32 - self.blue as f32) * ratio).round() as u8;
+
+        Color::new(r, g, b)
+    }
 }
 
 impl TryFrom<&str> for Color {
