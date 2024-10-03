@@ -19,9 +19,9 @@ pub enum ColorError {
     /// Error when the hex color format is invalid.
     #[error("Invalid hex color format. Use #RRGGBB.")]
     InvalidFormat,
-    /// Error when the hex value cannot be parsed.
-    #[error("Invalid hex value.")]
-    InvalidHexValue,
+    /// Error when the color format is invalid.
+    #[error("Invalid color format.")]
+    InvalidColorFormat,
 }
 
 impl Color {
@@ -90,10 +90,6 @@ impl Color {
 
         Color::with_alpha(red, green, blue, alpha)
     }
-}
-
-impl TryFrom<&str> for Color {
-    type Error = ColorError;
 
     /// Tries to create a `Color` from a hexadecimal color string.
     ///
@@ -104,7 +100,7 @@ impl TryFrom<&str> for Color {
     /// # Returns
     ///
     /// A `Result` containing either the created `Color` or a `ColorError`.
-    fn try_from(hex: &str) -> Result<Self, Self::Error> {
+    pub fn from_hex(hex: &str) -> Result<Self, ColorError> {
         if !hex.starts_with('#') {
             return Err(ColorError::InvalidFormat);
         }
@@ -117,13 +113,13 @@ impl TryFrom<&str> for Color {
                 (parse(0)?, parse(1)?, parse(2)?, 1.0)
             }
             6 => {
-                let (r, g, b) = parse_rgb(hex)?;
+                let (r, g, b) = parse_rgb_from_hex(hex)?;
                 (r, g, b, 1.0)
             }
             8 => {
-                let (r, g, b) = parse_rgb(hex)?;
-                let a =
-                    u8::from_str_radix(&hex[6..8], 16).map_err(|_| ColorError::InvalidHexValue)?;
+                let (r, g, b) = parse_rgb_from_hex(hex)?;
+                let a = u8::from_str_radix(&hex[6..8], 16)
+                    .map_err(|_| ColorError::InvalidColorFormat)?;
                 (r, g, b, a as f32 / 255.0)
             }
             _ => return Err(ColorError::InvalidFormat),
@@ -135,6 +131,70 @@ impl TryFrom<&str> for Color {
             blue,
             alpha,
         })
+    }
+
+    /// Tries to create a `Color` from a rgba color string.
+    /// The format is "rgba(r, g, b, a)" where r, g, b are the red, green, blue components (0-255)
+    /// Or "rgb(r, g, b)" where r, g, b are the red, green, blue components (0-255)
+    /// and a is the alpha component (0.0-1.0).
+    /// The spaces are optional.
+    /// The alpha component is optional and defaults to 1.0.
+    ///
+    /// # Arguments
+    ///
+    /// * `input` - A string slice that holds the rgba color code (e.g., "rgba(255, 128, 64, 0.5)", "rgb(255, 128, 64)")
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing either the created `Color` or a `ColorError`.
+    pub fn from_rgba(input: &str) -> Result<Self, ColorError> {
+        let input = input.trim();
+
+        if (!input.starts_with("rgba(") && !input.starts_with("rgb(")) || !input.ends_with(')') {
+            return Err(ColorError::InvalidFormat);
+        }
+
+        let input = match input.find('(') {
+            Some(idx) => &input[idx + 1..input.len() - 1],
+            None => return Err(ColorError::InvalidFormat),
+        };
+        let colors: Vec<&str> = input.split(',').collect();
+
+        if colors.len() < 3 || 4 < colors.len() {
+            return Err(ColorError::InvalidFormat);
+        }
+
+        let red = parse_and_validate_rgba(colors[0], 0.0, 255.0)?.round() as u8;
+        let green = parse_and_validate_rgba(colors[1], 0.0, 255.0)?.round() as u8;
+        let blue = parse_and_validate_rgba(colors[2], 0.0, 255.0)?.round() as u8;
+        let alpha = colors
+            .get(3)
+            .map_or(Ok(1.0), |a| parse_and_validate_rgba(a, 0.0, 1.0))
+            .map_err(|_| ColorError::InvalidColorFormat)?;
+
+        Ok(Color::with_alpha(red, green, blue, alpha))
+    }
+}
+
+impl TryFrom<&str> for Color {
+    type Error = ColorError;
+
+    /// Tries to create a `Color` from various string formats.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - A string slice that holds the color code
+    ///  (e.g., "#FF8040", "#FF8040FF", "rgba(255, 128, 64, 0.5)")
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing either the created `Color` or a `ColorError`.
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        if value.starts_with('#') {
+            Color::from_hex(value)
+        } else {
+            Color::from_rgba(value)
+        }
     }
 }
 
@@ -161,10 +221,22 @@ impl Display for Color {
 }
 
 fn parse_hex(value: &str) -> Result<u8, ColorError> {
-    u8::from_str_radix(value, 16).map_err(|_| ColorError::InvalidHexValue)
+    u8::from_str_radix(value, 16).map_err(|_| ColorError::InvalidColorFormat)
 }
 
-fn parse_rgb(hex: &str) -> Result<(u8, u8, u8), ColorError> {
+fn parse_rgb_from_hex(hex: &str) -> Result<(u8, u8, u8), ColorError> {
     let parse = |start, end| parse_hex(&hex[start..end]);
     Ok((parse(0, 2)?, parse(2, 4)?, parse(4, 6)?))
+}
+
+fn parse_and_validate_rgba(input: &str, min: f32, max: f32) -> Result<f32, ColorError> {
+    let value: f32 = input
+        .trim()
+        .parse()
+        .map_err(|_| ColorError::InvalidColorFormat)?;
+    if value < min || max < value {
+        Err(ColorError::InvalidColorFormat)
+    } else {
+        Ok(value)
+    }
 }

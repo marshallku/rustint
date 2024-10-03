@@ -68,4 +68,61 @@ mod tests {
         let color = Color::with_alpha(255, 128, 64, 0.8);
         assert_eq!(format!("{}", color), "#FF8040CC");
     }
+
+    #[test]
+    fn test_from_rgb_valid() {
+        let color = Color::try_from("rgb(255, 128, 64)").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 128);
+        assert_eq!(color.blue, 64);
+        assert_eq!(color.alpha, 1.0);
+
+        let color = Color::try_from("rgb(255,128, 64)").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 128);
+        assert_eq!(color.blue, 64);
+        assert_eq!(color.alpha, 1.0);
+
+        let color = Color::try_from("rgb(255,128,64)").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 128);
+        assert_eq!(color.blue, 64);
+        assert_eq!(color.alpha, 1.0);
+    }
+
+    #[test]
+    fn test_from_rgba_valid() {
+        let color = Color::try_from("rgba(255, 128, 64, 0.5)").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 128);
+        assert_eq!(color.blue, 64);
+        assert_eq!(color.alpha, 0.5);
+
+        let color = Color::try_from("rgba(255,128, 64, 0.5)").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 128);
+        assert_eq!(color.blue, 64);
+        assert_eq!(color.alpha, 0.5);
+
+        let color = Color::try_from("rgba(255, 128, 64,0.5)").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 128);
+        assert_eq!(color.blue, 64);
+        assert_eq!(color.alpha, 0.5);
+
+        let color = Color::try_from("rgba(255,128,64,0.5)").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 128);
+        assert_eq!(color.blue, 64);
+        assert_eq!(color.alpha, 0.5);
+    }
+
+    #[test]
+    fn test_from_rgb_invalid() {
+        assert!(Color::try_from("rgba(256, 255, 255, 0.5)").is_err());
+        assert!(Color::try_from("rgba(-1, 255, 255, 0.5)").is_err());
+        assert!(Color::try_from("rgba(255, 128, 64, -1)").is_err());
+        assert!(Color::try_from("rgba(a, 128, 64, 0.5)").is_err());
+        assert!(Color::try_from("rgb(255, 128)").is_err());
+    }
 }
