@@ -18,7 +18,7 @@ pub struct Color {
 }
 
 /// Error type for color parsing
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq)]
 pub enum ColorError {
     /// Error when the hex color format is invalid.
     #[error("Invalid hex color format. Use #RRGGBB.")]

@@ -5,6 +5,10 @@ pub fn parse_hex(value: &str) -> Result<u8, ColorError> {
 }
 
 pub fn parse_rgb_from_hex(hex: &str) -> Result<(u8, u8, u8), ColorError> {
+    if hex.len() != 6 && hex.len() != 8 {
+        return Err(ColorError::InvalidColorFormat);
+    }
+
     let parse = |start, end| parse_hex(&hex[start..end]);
     Ok((parse(0, 2)?, parse(2, 4)?, parse(4, 6)?))
 }
