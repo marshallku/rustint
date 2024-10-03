@@ -187,8 +187,7 @@ impl TryFrom<&str> for Color {
     ///
     /// # Arguments
     ///
-    /// * `value` - A string slice that holds the color code
-    ///  (e.g., "#FF8040", "#FF8040FF", "rgba(255, 128, 64, 0.5)")
+    /// * `value` - A string slice that holds the color code (e.g., "#FF8040", "#FF8040FF", "rgba(255, 128, 64, 0.5)")
     ///
     /// # Returns
     ///
