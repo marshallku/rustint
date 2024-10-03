@@ -56,6 +56,8 @@ mod tests {
         assert!(Color::try_from("FF8040CC").is_err());
         assert!(Color::try_from("#FF8040C").is_err());
         assert!(Color::try_from("FF8040ZZ").is_err());
+        assert!(Color::try_from("#F8Z").is_err());
+        assert!(Color::try_from("F8Z").is_err());
     }
 
     #[test]

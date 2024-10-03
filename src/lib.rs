@@ -105,34 +105,28 @@ impl TryFrom<&str> for Color {
     ///
     /// A `Result` containing either the created `Color` or a `ColorError`.
     fn try_from(hex: &str) -> Result<Self, Self::Error> {
-        if (hex.len() != 7 && hex.len() != 9 && hex.len() != 4) || !hex.starts_with('#') {
+        if !hex.starts_with('#') {
             return Err(ColorError::InvalidFormat);
         }
 
-        if hex.len() == 4 {
-            let red = u8::from_str_radix(&hex[1..2].repeat(2), 16)
-                .map_err(|_| ColorError::InvalidHexValue)?;
-            let green = u8::from_str_radix(&hex[2..3].repeat(2), 16)
-                .map_err(|_| ColorError::InvalidHexValue)?;
-            let blue = u8::from_str_radix(&hex[3..4].repeat(2), 16)
-                .map_err(|_| ColorError::InvalidHexValue)?;
+        let hex = &hex[1..]; // Remove '#' prefix
 
-            return Ok(Color {
-                red,
-                green,
-                blue,
-                alpha: 1.0,
-            });
-        }
-
-        let red = u8::from_str_radix(&hex[1..3], 16).map_err(|_| ColorError::InvalidHexValue)?;
-        let green = u8::from_str_radix(&hex[3..5], 16).map_err(|_| ColorError::InvalidHexValue)?;
-        let blue = u8::from_str_radix(&hex[5..7], 16).map_err(|_| ColorError::InvalidHexValue)?;
-        let alpha = if hex.len() == 9 {
-            u8::from_str_radix(&hex[7..9], 16).map_err(|_| ColorError::InvalidHexValue)? as f32
-                / 255.0
-        } else {
-            1.0
+        let (red, green, blue, alpha) = match hex.len() {
+            3 => {
+                let parse = |idx| parse_hex(&hex[idx..idx + 1]).map(|v| v * 17);
+                (parse(0)?, parse(1)?, parse(2)?, 1.0)
+            }
+            6 => {
+                let (r, g, b) = parse_rgb(hex)?;
+                (r, g, b, 1.0)
+            }
+            8 => {
+                let (r, g, b) = parse_rgb(hex)?;
+                let a =
+                    u8::from_str_radix(&hex[6..8], 16).map_err(|_| ColorError::InvalidHexValue)?;
+                (r, g, b, a as f32 / 255.0)
+            }
+            _ => return Err(ColorError::InvalidFormat),
         };
 
         Ok(Color {
@@ -164,4 +158,13 @@ impl Display for Color {
             )
         }
     }
+}
+
+fn parse_hex(value: &str) -> Result<u8, ColorError> {
+    u8::from_str_radix(value, 16).map_err(|_| ColorError::InvalidHexValue)
+}
+
+fn parse_rgb(hex: &str) -> Result<(u8, u8, u8), ColorError> {
+    let parse = |start, end| parse_hex(&hex[start..end]);
+    Ok((parse(0, 2)?, parse(2, 4)?, parse(4, 6)?))
 }
