@@ -21,6 +21,19 @@ mod tests {
     }
 
     #[test]
+    fn test_from_hex_valid_short() {
+        let color = Color::try_from("#F80").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 136);
+        assert_eq!(color.blue, 0);
+
+        let color = Color::try_from("#f80").unwrap();
+        assert_eq!(color.red, 255);
+        assert_eq!(color.green, 136);
+        assert_eq!(color.blue, 0);
+    }
+
+    #[test]
     fn test_from_hex_with_alpha() {
         let color = Color::try_from("#FF8040FF").unwrap();
         assert_eq!(color.red, 255);

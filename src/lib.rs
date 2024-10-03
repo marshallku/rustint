@@ -105,8 +105,24 @@ impl TryFrom<&str> for Color {
     ///
     /// A `Result` containing either the created `Color` or a `ColorError`.
     fn try_from(hex: &str) -> Result<Self, Self::Error> {
-        if (hex.len() != 7 && hex.len() != 9) || !hex.starts_with('#') {
+        if (hex.len() != 7 && hex.len() != 9 && hex.len() != 4) || !hex.starts_with('#') {
             return Err(ColorError::InvalidFormat);
+        }
+
+        if hex.len() == 4 {
+            let red = u8::from_str_radix(&hex[1..2].repeat(2), 16)
+                .map_err(|_| ColorError::InvalidHexValue)?;
+            let green = u8::from_str_radix(&hex[2..3].repeat(2), 16)
+                .map_err(|_| ColorError::InvalidHexValue)?;
+            let blue = u8::from_str_radix(&hex[3..4].repeat(2), 16)
+                .map_err(|_| ColorError::InvalidHexValue)?;
+
+            return Ok(Color {
+                red,
+                green,
+                blue,
+                alpha: 1.0,
+            });
         }
 
         let red = u8::from_str_radix(&hex[1..3], 16).map_err(|_| ColorError::InvalidHexValue)?;
