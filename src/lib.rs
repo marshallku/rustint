@@ -179,6 +179,15 @@ impl Color {
         Ok(Color::with_alpha(red, green, blue, alpha))
     }
 
+    /// Checks if the color has an alpha component.
+    ///
+    /// # Returns
+    ///
+    /// A boolean indicating if the color has an alpha component.
+    fn has_alpha(&self) -> bool {
+        (self.alpha - 1.0).abs() > f32::EPSILON
+    }
+
     /// Converts the `Color` to a hexadecimal color string.
     /// The format is "#RRGGBB" or "#RRGGBBAA" where RR, GG, BB are the red, green, blue components (00-FF)
     /// and AA is the alpha component (00-FF).
@@ -187,7 +196,7 @@ impl Color {
     ///
     /// A `String` representing the color in "#RRGGBB" or "#RRGGBBAA" format.
     pub fn to_hex(&self) -> String {
-        if (self.alpha - 1.0).abs() < f32::EPSILON {
+        if !self.has_alpha() {
             format!("#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
         } else {
             format!(
@@ -208,7 +217,7 @@ impl Color {
     ///
     /// A `String` representing the color in "rgba(r, g, b, a)" format.
     pub fn to_rgba(&self) -> String {
-        if (self.alpha - 1.0).abs() < f32::EPSILON {
+        if !self.has_alpha() {
             format!("rgb({}, {}, {})", self.red, self.green, self.blue)
         } else {
             format!(
