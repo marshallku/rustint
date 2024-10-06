@@ -41,6 +41,7 @@
         "reqwest",
         "rfind",
         "RRGGBB",
+        "RRGGBBAA",
         "rustint",
         "Seedable",
         "Segoe",
