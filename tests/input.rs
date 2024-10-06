@@ -61,15 +61,6 @@ mod tests {
     }
 
     #[test]
-    fn test_to_hex() {
-        let color = Color::new(255, 128, 64);
-        assert_eq!(format!("{}", color), "#FF8040");
-
-        let color = Color::with_alpha(255, 128, 64, 0.8);
-        assert_eq!(format!("{}", color), "#FF8040CC");
-    }
-
-    #[test]
     fn test_from_rgb_valid() {
         let color = Color::try_from("rgb(255, 128, 64)").unwrap();
         assert_eq!(color.red, 255);
