@@ -178,6 +178,45 @@ impl Color {
 
         Ok(Color::with_alpha(red, green, blue, alpha))
     }
+
+    /// Converts the `Color` to a hexadecimal color string.
+    /// The format is "#RRGGBB" or "#RRGGBBAA" where RR, GG, BB are the red, green, blue components (00-FF)
+    /// and AA is the alpha component (00-FF).
+    ///
+    /// # Returns
+    ///
+    /// A `String` representing the color in "#RRGGBB" or "#RRGGBBAA" format.
+    pub fn to_hex(&self) -> String {
+        if (self.alpha - 1.0).abs() < f32::EPSILON {
+            format!("#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
+        } else {
+            format!(
+                "#{:02X}{:02X}{:02X}{:02X}",
+                self.red,
+                self.green,
+                self.blue,
+                (self.alpha * 255.0) as u8
+            )
+        }
+    }
+
+    /// Converts the `Color` to a rgba color string.
+    /// The format is "rgba(r, g, b, a)" where r, g, b are the red, green, blue components (0-255)
+    /// and a is the alpha component (0.0-1.0).
+    ///
+    /// # Returns
+    ///
+    /// A `String` representing the color in "rgba(r, g, b, a)" format.
+    pub fn to_rgba(&self) -> String {
+        if (self.alpha - 1.0).abs() < f32::EPSILON {
+            format!("rgb({}, {}, {})", self.red, self.green, self.blue)
+        } else {
+            format!(
+                "rgba({}, {}, {}, {})",
+                self.red, self.green, self.blue, self.alpha
+            )
+        }
+    }
 }
 
 impl TryFrom<&str> for Color {
@@ -208,17 +247,6 @@ impl Display for Color {
     ///
     /// A `String` representing the color in "#RRGGBB" format.
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        if (self.alpha - 1.0).abs() < f32::EPSILON {
-            write!(f, "#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
-        } else {
-            write!(
-                f,
-                "#{:02X}{:02X}{:02X}{:02X}",
-                self.red,
-                self.green,
-                self.blue,
-                (self.alpha * 255.0) as u8
-            )
-        }
+        write!(f, "{}", self.to_hex())
     }
 }
