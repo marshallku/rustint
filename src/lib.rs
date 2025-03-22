@@ -1,6 +1,9 @@
 use std::fmt::{self, Display, Formatter};
 
-use utils::parse::{parse_and_validate_rgba, parse_hex, parse_rgb_from_hex};
+use utils::{
+    color::{sanitize_alpha, sanitize_rgb},
+    parse::{parse_and_validate_rgba, parse_hex, parse_rgb_from_hex},
+};
 
 mod utils;
 
@@ -42,9 +45,9 @@ impl Color {
     /// A new `Color` instance.
     pub fn new(red: u8, green: u8, blue: u8) -> Self {
         Color {
-            red,
-            green,
-            blue,
+            red: sanitize_rgb(red),
+            green: sanitize_rgb(green),
+            blue: sanitize_rgb(blue),
             alpha: 1.0,
         }
     }
@@ -66,10 +69,10 @@ impl Color {
     /// A new `Color` instance.
     pub fn with_alpha(red: u8, green: u8, blue: u8, alpha: f32) -> Self {
         Color {
-            red,
-            green,
-            blue,
-            alpha: alpha.clamp(0.0, 1.0),
+            red: sanitize_rgb(red),
+            green: sanitize_rgb(green),
+            blue: sanitize_rgb(blue),
+            alpha: sanitize_alpha(alpha),
         }
     }
 
